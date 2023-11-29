@@ -7,8 +7,8 @@ public class Boletim {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Double valor;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "ID_ALUNO")
@@ -48,5 +48,31 @@ public class Boletim {
 
     public void setDisciplina(Disciplina disciplina) {
         this.disciplina = disciplina;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        validarNota();
+        calcularStatus();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        validarNota();
+        calcularStatus();
+    }
+
+    private void validarNota() {
+        if (valor == null || valor < 0 || valor > 10) {
+            throw new IllegalArgumentException("A nota deve estar entre 0 e 10");
+        }
+    }
+
+    private void calcularStatus() {
+        if (valor == null) {
+            status = "Ativo";
+        } else {
+            status = valor >= 7 ? "Aprovado" : "Reprovado";
+        }
     }
 }
